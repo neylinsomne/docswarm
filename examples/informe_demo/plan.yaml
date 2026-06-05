@@ -1,0 +1,35 @@
+# plan.yaml — the document plan that drives the swarm.
+#
+# This is the ONE place the "domain" lives. In a tender system this would be the
+# proposal outline; here it is a tiny two-section activity report — zero business
+# logic in the engine. Agent A produces a table; agent B cites it; a judge votes.
+
+title: "Activity Report"
+
+sections:
+  - id: metrics
+    agent: tabulator          # which agent writes this section
+    order: 1
+    title: "Period metrics"
+    must_cover:
+      - "a table of the period's key metrics"
+    must_not_cover:
+      - "interpretation of the metrics (belongs to the analysis section)"
+    max_words: 200
+    produces:
+      - anchor_id: tbl-metrics
+        type: table
+        title: "Period metrics"
+        schema: ["Metric", "Value"]
+
+  - id: analysis
+    agent: analyst
+    order: 2
+    title: "Analysis"
+    must_cover:
+      - "interpretation of the metrics"
+    must_not_cover:
+      - "re-printing the metrics table (only cite it)"
+    max_words: 300
+    consumes:
+      - tbl-metrics            # cites the table from the previous section

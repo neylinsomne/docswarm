@@ -1,0 +1,31 @@
+# Minimal stack to run the swarm against a local LLM (Ollama).
+#
+#   docker compose up -d
+#   docker compose exec engine python -m examples.informe_demo.run --ollama
+#
+# The engine itself needs nothing but Python; Ollama is only required if you
+# want real model output instead of the offline StubLLM.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    # Pull a model once it's up:  docker compose exec ollama ollama pull qwen3:8b
+
+  engine:
+    build: .
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    # Keep the container alive for `docker compose exec` sessions.
+    command: ["python", "-c", "import time; print('docswarm engine ready'); time.sleep(1e9)"]
+
+volumes:
+  ollama_models:

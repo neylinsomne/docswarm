@@ -1,0 +1,10 @@
+{
+  "report_title": "Q2 Activity Report",
+  "period": "2026-Q2",
+  "author": "Operations team",
+  "metrics": [
+    {"name": "Documents processed", "value": 1284},
+    {"name": "Average latency (ms)", "value": 320},
+    {"name": "Error rate (%)", "value": 0.7}
+  ]
+}

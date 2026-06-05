@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docswarm"
+version = "0.1.0"
+description = "A domain-agnostic engine to ingest documents and generate structured documents with a swarm of cooperating agents (ACP-style) that never overlap."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "docswarm contributors" }]
+keywords = ["agents", "acp", "document-generation", "rag", "orchestration", "blackboard", "swarm", "etl"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# The engine core is ZERO third-party deps. Everything heavy is optional.
+dependencies = []
+
+[project.optional-dependencies]
+# YAML plan files (examples use it; the engine accepts dict plans without it).
+yaml = ["PyYAML>=6.0"]
+# Document extraction (ingest layer). Each is independent and lazily imported.
+ingest = ["pymupdf>=1.23", "python-docx>=1.1", "openpyxl>=3.1"]
+# Optional ACP protocol server (multi-process / cross-language agents).
+acp = ["acp-sdk>=1.0"]
+# Dev / test
+dev = ["pytest>=7.4", "PyYAML>=6.0"]
+
+[project.urls]
+Homepage = "https://github.com/neylinsomne/docswarm"
+Issues = "https://github.com/neylinsomne/docswarm/issues"
+
+[project.scripts]
+docswarm-demo = "examples.informe_demo.run:main"
+
+[tool.setuptools.packages.find]
+include = ["docswarm*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
