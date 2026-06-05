@@ -27,3 +27,7 @@ desktop.ini
 out/
 *.log
 .env
+
+# Private reference architecture (maps an internal/private backend — must NEVER
+# be published in this public repo). Kept locally only.
+docs/reference-architecture/
