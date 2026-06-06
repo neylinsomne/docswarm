@@ -1,0 +1,43 @@
+{
+  "_meta": {
+    "describe": "Mock del tablero de cambios (feature central) y su drill-down.",
+    "mirror_endpoint_tablero": "GET /api/v1/cambios",
+    "mirror_endpoint_afectados": "GET /api/v1/cambios/{id}/afectados"
+  },
+  "tablero": [
+    {"cambio_id": 1, "tipo_objeto": "PRECIO", "accion": "ACTUALIZACION",
+     "descripcion": "Ajuste de precio de maíz amarillo (+8%)", "objeto_codigo": "PR-MAIZ-AMARILLO",
+     "objeto_titulo": "Maíz amarillo", "version_anterior": 1, "version_nueva": 2,
+     "created_at": "2026-06-05T21:39:13Z", "docs_afectados": 1, "docs_firmados": 1, "docs_pendientes": 0},
+    {"cambio_id": 2, "tipo_objeto": "CLAUSULA", "accion": "ACTUALIZACION",
+     "descripcion": "Endurecimiento de calidad (humedad <= 12%)", "objeto_codigo": "CL-CALIDAD-001",
+     "objeto_titulo": "Estándar de calidad de grano", "version_anterior": 1, "version_nueva": 2,
+     "created_at": "2026-06-06T09:10:00Z", "docs_afectados": 4, "docs_firmados": 1, "docs_pendientes": 3},
+    {"cambio_id": 3, "tipo_objeto": "PRECIO", "accion": "ACTUALIZACION",
+     "descripcion": "Ajuste de precio de urea por mercado", "objeto_codigo": "PR-UREA-46",
+     "objeto_titulo": "Urea 46%", "version_anterior": 1, "version_nueva": 2,
+     "created_at": "2026-06-06T11:00:00Z", "docs_afectados": 1, "docs_firmados": 0, "docs_pendientes": 1}
+  ],
+  "afectados_ejemplo_cambio_2": [
+    {"afectado_id": 1, "contrato_id": 1, "contrato_numero": "CTR-2026-001",
+     "contrato_titulo": "Suministro de semilla de soya 2026", "empresa_proveedor_id": 2,
+     "empresa_proveedor": "AgroSemillas del Valle", "estado_propagacion": "APLICADO",
+     "firmado_proveedor": true, "fecha_firma": "2026-06-06T10:05:00Z",
+     "notificado_at": "2026-06-06T09:10:05Z", "raw_document_id": 1},
+    {"afectado_id": 2, "contrato_id": 2, "contrato_numero": "CTR-2026-002",
+     "contrato_titulo": "Suministro de maíz amarillo 2026", "empresa_proveedor_id": 3,
+     "empresa_proveedor": "Alimentos del Campo", "estado_propagacion": "NOTIFICADO",
+     "firmado_proveedor": false, "fecha_firma": null,
+     "notificado_at": "2026-06-06T09:10:05Z", "raw_document_id": null},
+    {"afectado_id": 3, "contrato_id": 5, "contrato_numero": "CTR-2026-005",
+     "contrato_titulo": "Empaques biodegradables 2026", "empresa_proveedor_id": 7,
+     "empresa_proveedor": "Empaques VerdePack", "estado_propagacion": "NOTIFICADO",
+     "firmado_proveedor": false, "fecha_firma": null,
+     "notificado_at": "2026-06-06T09:10:05Z", "raw_document_id": null},
+    {"afectado_id": 4, "contrato_id": 6, "contrato_numero": "CTR-2026-006",
+     "contrato_titulo": "Agroquímicos campaña 2026", "empresa_proveedor_id": 8,
+     "empresa_proveedor": "AgroQuímicos Tropical", "estado_propagacion": "PENDIENTE",
+     "firmado_proveedor": false, "fecha_firma": null,
+     "notificado_at": null, "raw_document_id": null}
+  ]
+}

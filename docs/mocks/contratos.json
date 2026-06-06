@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "describe": "Mock de contratos para el front.",
+    "mirror_endpoint_lista": "GET /api/v1/contratos",
+    "mirror_endpoint_detalle": "GET /api/v1/contratos/{id} (incluye clausulas)",
+    "empresa_compradora_id": 1
+  },
+  "lista": [
+    {"id": 1, "empresa_proveedor_id": 2, "empresa_compradora_id": 1, "numero": "CTR-2026-001",
+     "titulo": "Suministro de semilla de soya 2026", "estado": "VIGENTE", "valor": 425000000.0,
+     "moneda": "COP", "firmado_proveedor": true, "sector": "agro"},
+    {"id": 2, "empresa_proveedor_id": 3, "empresa_compradora_id": 1, "numero": "CTR-2026-002",
+     "titulo": "Suministro de maíz amarillo 2026", "estado": "VIGENTE", "valor": 960000000.0,
+     "moneda": "COP", "firmado_proveedor": true, "sector": "agro"},
+    {"id": 3, "empresa_proveedor_id": 4, "empresa_compradora_id": 1, "numero": "CTR-2026-003",
+     "titulo": "Suministro de urea y DAP 2026", "estado": "VIGENTE", "valor": 1540000000.0,
+     "moneda": "COP", "firmado_proveedor": false, "sector": "agro"},
+    {"id": 4, "empresa_proveedor_id": 6, "empresa_compradora_id": 1, "numero": "CTR-2026-004",
+     "titulo": "Transporte refrigerado regional 2026", "estado": "BORRADOR", "valor": 320000000.0,
+     "moneda": "COP", "firmado_proveedor": false, "sector": "logistica"},
+    {"id": 5, "empresa_proveedor_id": 7, "empresa_compradora_id": 1, "numero": "CTR-2026-005",
+     "titulo": "Empaques biodegradables 2026", "estado": "VIGENTE", "valor": 180000000.0,
+     "moneda": "COP", "firmado_proveedor": true, "sector": "agro"},
+    {"id": 6, "empresa_proveedor_id": 8, "empresa_compradora_id": 1, "numero": "CTR-2026-006",
+     "titulo": "Agroquímicos campaña 2026", "estado": "SUSPENDIDO", "valor": 410000000.0,
+     "moneda": "COP", "firmado_proveedor": false, "sector": "agro"}
+  ],
+  "detalle_ejemplo": {
+    "id": 3, "empresa_proveedor_id": 4, "empresa_compradora_id": 1, "numero": "CTR-2026-003",
+    "titulo": "Suministro de urea y DAP 2026", "objeto": "Suministro anual de fertilizantes nitrogenados y fosfatados",
+    "estado": "VIGENTE", "valor": 1540000000.0, "moneda": "COP", "firmado_proveedor": false,
+    "fecha_firma": null, "sector": "agro", "fecha_inicio": "2026-01-01", "fecha_fin": "2026-12-31",
+    "metadata": {"region": "Oriente", "modalidad": "entrega programada"},
+    "clausulas": [
+      {"id": 10, "tipo": "CALIDAD", "titulo": "Estándar de calidad de grano",
+       "contenido": "El producto debe cumplir humedad <= 13% e impurezas <= 1%.",
+       "orden": 1, "version": 1, "clausula_maestra_id": 1, "precio_maestro_id": null, "valor": null},
+      {"id": 11, "tipo": "ENTREGA", "titulo": "Plazo de entrega",
+       "contenido": "Entrega en máximo 15 días hábiles desde la orden de compra.",
+       "orden": 2, "version": 1, "clausula_maestra_id": 2, "precio_maestro_id": null, "valor": null},
+      {"id": 12, "tipo": "PRECIO", "titulo": "Precio Urea 46%",
+       "contenido": "Precio pactado: 2300000 COP/ton", "orden": 3, "version": 1,
+       "clausula_maestra_id": null, "precio_maestro_id": 4, "valor": 2300000.0},
+      {"id": 13, "tipo": "PRECIO", "titulo": "Precio DAP",
+       "contenido": "Precio pactado: 2850000 COP/ton", "orden": 4, "version": 1,
+       "clausula_maestra_id": null, "precio_maestro_id": 5, "valor": 2850000.0},
+      {"id": 14, "tipo": "PAGO", "titulo": "Condiciones de pago",
+       "contenido": "Pago a 30 días calendario desde la radicación de la factura.",
+       "orden": 5, "version": 1, "clausula_maestra_id": 3, "precio_maestro_id": null, "valor": null}
+    ]
+  }
+}

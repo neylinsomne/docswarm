@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "describe": "Mock de empresas proveedoras (nicho agro) para el front.",
+    "mirror_endpoint_lista": "GET /api/v1/empresas",
+    "mirror_endpoint_detalle": "GET /api/v1/empresas/{id} (incluye caracteristicas)",
+    "nota": "Bayern (id 1) es la empresa COMPRADOR/admin; el resto son PROVEEDOR."
+  },
+  "comprador": {
+    "id": 1, "tipo": "COMPRADOR", "nombre": "Bayern S.A.", "nit": "900000001-1",
+    "sector": "agro", "nicho": "insumos", "pais": "CO", "ciudad": "Bogotá",
+    "metadata": {"rol": "granbase", "telefono": "+57 601 7000000"}, "activo": true
+  },
+  "proveedores": [
+    {
+      "id": 2, "tipo": "PROVEEDOR", "nombre": "AgroSemillas del Valle", "nit": "900111111-1",
+      "sector": "agro", "nicho": "semillas", "pais": "CO", "ciudad": "Cali",
+      "metadata": {"capacidad_ton": 1500, "empleados": 85, "telefono": "+57 602 5551111",
+                   "certificaciones": ["ISO9001", "ICA"], "anios_experiencia": 18},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "ISO9001", "valor_num": null},
+        {"clave": "certificacion", "valor": "ICA", "valor_num": null},
+        {"clave": "capacidad_ton", "valor": "1500", "valor_num": 1500}
+      ]
+    },
+    {
+      "id": 3, "tipo": "PROVEEDOR", "nombre": "Alimentos del Campo", "nit": "900222222-2",
+      "sector": "agro", "nicho": "alimentos", "pais": "CO", "ciudad": "Medellín",
+      "metadata": {"capacidad_ton": 3200, "empleados": 140, "telefono": "+57 604 5552222",
+                   "certificaciones": ["HACCP", "BPM"], "anios_experiencia": 22},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "HACCP", "valor_num": null},
+        {"clave": "capacidad_ton", "valor": "3200", "valor_num": 3200}
+      ]
+    },
+    {
+      "id": 4, "tipo": "PROVEEDOR", "nombre": "Fertilizantes Andinos", "nit": "900333333-3",
+      "sector": "agro", "nicho": "fertilizantes", "pais": "CO", "ciudad": "Bucaramanga",
+      "metadata": {"capacidad_ton": 5400, "empleados": 210, "telefono": "+57 607 5553333",
+                   "certificaciones": ["ISO14001", "ICA"], "anios_experiencia": 30},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "ISO14001", "valor_num": null},
+        {"clave": "capacidad_ton", "valor": "5400", "valor_num": 5400}
+      ]
+    },
+    {
+      "id": 5, "tipo": "PROVEEDOR", "nombre": "Maquinaria Agrícola Coltrac", "nit": "900444444-4",
+      "sector": "agro", "nicho": "maquinaria", "pais": "CO", "ciudad": "Bogotá",
+      "metadata": {"empleados": 60, "telefono": "+57 601 5554444",
+                   "certificaciones": ["ISO9001"], "lineas": ["tractores", "cosechadoras"],
+                   "anios_experiencia": 12},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "ISO9001", "valor_num": null},
+        {"clave": "garantia_meses", "valor": "24", "valor_num": 24}
+      ]
+    },
+    {
+      "id": 6, "tipo": "PROVEEDOR", "nombre": "Logística FríoSeguro", "nit": "900555555-5",
+      "sector": "logistica", "nicho": "cadena_frio", "pais": "CO", "ciudad": "Barranquilla",
+      "metadata": {"flota": 45, "empleados": 320, "telefono": "+57 605 5555555",
+                   "certificaciones": ["ISO9001", "BASC"], "temperatura_min_c": -25},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "BASC", "valor_num": null},
+        {"clave": "flota_vehiculos", "valor": "45", "valor_num": 45}
+      ]
+    },
+    {
+      "id": 7, "tipo": "PROVEEDOR", "nombre": "Empaques VerdePack", "nit": "900666666-6",
+      "sector": "agro", "nicho": "empaques", "pais": "CO", "ciudad": "Cali",
+      "metadata": {"capacidad_ton": 900, "empleados": 70, "telefono": "+57 602 5556666",
+                   "certificaciones": ["FSC", "ISO9001"], "material": "biodegradable"},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "FSC", "valor_num": null},
+        {"clave": "biodegradable", "valor": "si", "valor_num": null}
+      ]
+    },
+    {
+      "id": 8, "tipo": "PROVEEDOR", "nombre": "AgroQuímicos Tropical", "nit": "900777777-7",
+      "sector": "agro", "nicho": "agroquimicos", "pais": "CO", "ciudad": "Villavicencio",
+      "metadata": {"capacidad_ton": 2100, "empleados": 95, "telefono": "+57 608 5557777",
+                   "certificaciones": ["ICA", "ISO45001"], "anios_experiencia": 16},
+      "activo": true,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "ISO45001", "valor_num": null},
+        {"clave": "capacidad_ton", "valor": "2100", "valor_num": 2100}
+      ]
+    },
+    {
+      "id": 9, "tipo": "PROVEEDOR", "nombre": "Riego Tecnificado del Norte", "nit": "900888888-8",
+      "sector": "agro", "nicho": "riego", "pais": "CO", "ciudad": "Valledupar",
+      "metadata": {"empleados": 40, "telefono": "+57 605 5558888",
+                   "certificaciones": ["ISO9001"], "tecnologia": "goteo"},
+      "activo": false,
+      "caracteristicas": [
+        {"clave": "certificacion", "valor": "ISO9001", "valor_num": null},
+        {"clave": "tecnologia", "valor": "goteo", "valor_num": null}
+      ]
+    }
+  ]
+}

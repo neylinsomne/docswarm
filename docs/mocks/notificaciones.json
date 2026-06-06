@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "describe": "Mock de avisos in-page (canal SISTEMA) y firmas para el front.",
+    "mirror_endpoint_avisos": "GET /api/v1/notificaciones?canal=SISTEMA&no_leidas=true",
+    "mirror_endpoint_conteo": "GET /api/v1/notificaciones/no_leidas/conteo",
+    "mirror_endpoint_firmas": "GET /api/v1/firmas"
+  },
+  "conteo_no_leidas": {"no_leidas": 3},
+  "notificaciones": [
+    {"id": 12, "canal": "SISTEMA", "tipo": "CAMBIO", "empresa_id": 3, "usuario_id": 3,
+     "afectado_id": 2, "contrato_id": 2, "destino": null,
+     "asunto": "Cambio en su contrato CTR-2026-002",
+     "mensaje": "Bayern actualizó una cláusula/precio que afecta su contrato CTR-2026-002. Por favor revise y firme la actualización.",
+     "estado": "ENTREGADO", "referencia_externa": null, "enviado_at": null,
+     "entregado_at": "2026-06-06T09:10:05Z", "leido_at": null, "created_at": "2026-06-06T09:10:05Z"},
+    {"id": 13, "canal": "WHATSAPP", "tipo": "CAMBIO", "empresa_id": 3, "usuario_id": 3,
+     "afectado_id": 2, "contrato_id": 2, "destino": "+57 604 5552222",
+     "asunto": "Cambio en su contrato CTR-2026-002",
+     "mensaje": "Bayern actualizó una cláusula/precio que afecta su contrato CTR-2026-002.",
+     "estado": "PENDIENTE", "referencia_externa": null, "enviado_at": null,
+     "entregado_at": null, "leido_at": null, "created_at": "2026-06-06T09:10:05Z"},
+    {"id": 11, "canal": "GMAIL", "tipo": "CAMBIO", "empresa_id": 2, "usuario_id": 2,
+     "afectado_id": 1, "contrato_id": 1, "destino": "semillas.demo@docswarm.local",
+     "asunto": "Cambio en su contrato CTR-2026-001",
+     "mensaje": "Bayern actualizó una cláusula/precio que afecta su contrato CTR-2026-001.",
+     "estado": "ENTREGADO", "referencia_externa": "dryrun-gmail", "enviado_at": "2026-06-06T09:11:00Z",
+     "entregado_at": "2026-06-06T09:11:02Z", "leido_at": "2026-06-06T10:00:00Z", "created_at": "2026-06-06T09:10:05Z"}
+  ],
+  "firmas": [
+    {"id": 1, "empresa_id": 2, "contrato_id": 1, "afectado_id": 1, "usuario_id": 2,
+     "canal": "WEB", "estado": "FIRMADA", "token": "tok_abc123", "referencia_externa": null,
+     "firmado_at": "2026-06-06T10:05:00Z", "created_at": "2026-06-06T10:04:50Z"}
+  ]
+}

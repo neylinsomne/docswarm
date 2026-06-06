@@ -1,31 +1,240 @@
-# Minimal stack to run the swarm against a local LLM (Ollama).
+# =============================================================================
+# Stack backend · gestión documental B2B (Bayern + proveedores)
+# -----------------------------------------------------------------------------
+#   docker compose up -d postgres minio ollama        # infraestructura
+#   docker compose run --rm flyway migrate            # aplica el esquema
+#   docker compose up -d api worker                    # backend
+#   docker compose --profile tools up -d pgadmin       # admin opcional
 #
-#   docker compose up -d
-#   docker compose exec engine python -m examples.informe_demo.run --ollama
-#
-# The engine itself needs nothing but Python; Ollama is only required if you
-# want real model output instead of the offline StubLLM.
+# Todas las imágenes ya están disponibles localmente (no se descargan nuevas).
+# Variables sensibles en .env (ver .env.example).
+# =============================================================================
 
 services:
+  # --------------------------- PostgreSQL + pgvector -------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docswarm}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-docswarm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------- Flyway (migraciones) -------------------------
+  # Conecta como owner (postgres) para poder crear objetos. La APP, en cambio,
+  # conecta como docswarm_app (NOSUPERUSER NOBYPASSRLS) para que RLS surta efecto.
+  flyway:
+    image: flyway/flyway:10
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-docswarm}
+      FLYWAY_USER: ${POSTGRES_USER:-postgres}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      FLYWAY_BASELINE_ON_MIGRATE: "true"
+    volumes:
+      - ./db/migrations:/flyway/sql:ro
+    command: ["migrate"]
+
+  # --------------------------- MinIO (object storage) -----------------------
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------- Ollama (LLM local) ---------------------------
   ollama:
     image: ollama/ollama:latest
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_models:/root/.ollama
-    # Pull a model once it's up:  docker compose exec ollama ollama pull qwen3:8b
+    # Descargar un modelo una vez:  docker compose exec ollama ollama pull qwen3:8b
 
-  engine:
-    build: .
+  # --------------------------- API (FastAPI) --------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
     depends_on:
-      - ollama
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      ollama:
+        condition: service_started
+    env_file: .env
     environment:
-      OLLAMA_HOST: "http://ollama:11434"
+      # La app SIEMPRE conecta con el rol restringido para que RLS funcione.
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-docswarm}
+      DB_USER: ${APP_DB_USER:-docswarm_app}
+      DB_PASSWORD: ${APP_DB_PASSWORD:-change_me_in_env}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      OLLAMA_HOST: http://ollama:11434
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      LLM_PREFER: ${LLM_PREFER:-auto}
+    ports:
+      - "${API_PORT:-8000}:8000"
     volumes:
       - ./:/app
     working_dir: /app
-    # Keep the container alive for `docker compose exec` sessions.
-    command: ["python", "-c", "import time; print('docswarm engine ready'); time.sleep(1e9)"]
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # --------------------------- Frontend (SPA + nginx) -----------------------
+  # SPA React/Vite servido por nginx. El mismo nginx hace reverse-proxy de /api
+  # y /docs hacia api:8000 por la red interna, así el navegador habla con un
+  # único origen (sin CORS). El túnel Cloudflare apunta aquí (frontend:80).
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    restart: unless-stopped
+
+  # --------------------------- Worker (cola/ETL) ----------------------------
+  worker:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-docswarm}
+      DB_USER: ${APP_DB_USER:-docswarm_app}
+      DB_PASSWORD: ${APP_DB_PASSWORD:-change_me_in_env}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      OLLAMA_HOST: http://ollama:11434
+      # El worker conecta como admin (ve todos los tenants) para procesar la cola.
+      DB_ALLOW_ADMIN_ROLE: "1"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: ["python", "-m", "app.orchestration.worker"]
+
+  # --------------------------- WhatsApp Gateway (Baileys, QR) ----------------
+  # Vincula una cuenta de WhatsApp por QR (como WhatsApp Web) y expone /send para
+  # que el notifier mande mensajes. Sesión persistida en el volumen wa_auth.
+  # Vincular: abre http://localhost:${WA_GATEWAY_PORT:-3010}/qr y escanea.
+  # ⚠️ Vía NO oficial (ToS de WhatsApp): para demo/pruebas, riesgo de baneo.
+  wa-gateway:
+    build:
+      context: ./services/wa-gateway
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3000"
+      AUTH_DIR: /data/auth
+      WA_GATEWAY_KEY: ${SERVICE_API_KEY:-dev-service-key-change-me}
+      WA_DEFAULT_COUNTRY_CODE: ${WA_DEFAULT_COUNTRY_CODE:-57}
+    ports:
+      - "${WA_GATEWAY_PORT:-3010}:3000"
+    volumes:
+      - wa_auth:/data
+    restart: unless-stopped
+
+  # --------------------------- Notifier (microservicio) ---------------------
+  # Imagen y puerto propios: si falla, el core API/DB siguen vivos y las
+  # notificaciones quedan PENDIENTES hasta que vuelva.
+  notifier:
+    build:
+      context: .
+      dockerfile: services/notifier/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      wa-gateway:
+        condition: service_started
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-docswarm}
+      DB_USER: ${APP_DB_USER:-docswarm_app}
+      DB_PASSWORD: ${APP_DB_PASSWORD:-change_me_in_env}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-dev-service-key-change-me}
+      # WhatsApp por QR (gateway Baileys). Si está vacío y no hay token Cloud API,
+      # el canal opera en dry-run.
+      WA_GATEWAY_URL: ${WA_GATEWAY_URL:-http://wa-gateway:3000}
+      WA_GATEWAY_KEY: ${SERVICE_API_KEY:-dev-service-key-change-me}
+      # Credenciales reales de los canales (vacías → modo dry-run en el MVP).
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID:-}
+      GMAIL_USER: ${GMAIL_USER:-}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-}
+    ports:
+      - "${NOTIFIER_PORT:-8010}:8010"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: ["uvicorn", "services.notifier.main:app", "--host", "0.0.0.0", "--port", "8010", "--reload"]
+
+  # --------------------------- Cloudflare Tunnel (perfil tunnel) ------------
+  # Expone la API públicamente en https://docswarm.vara-alta.lat sin abrir
+  # puertos en el router. Las credenciales del túnel viven FUERA del repo
+  # (CLOUDFLARED_DIR, p.ej. C:/Users/<tu-usuario>/.cloudflared) para no
+  # subirlas a este repo público ni a OneDrive. El routing/ingress está en
+  # ese config.yml. Arranque:  docker compose --profile tunnel up -d cloudflared
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "--config", "/etc/cloudflared/config.yml", "run"]
+    volumes:
+      - ${CLOUDFLARED_DIR:-./cloudflared}:/etc/cloudflared:ro
+    depends_on:
+      - frontend
+      - api
+
+  # --------------------------- pgAdmin (perfil tools) -----------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@docswarm.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
 
 volumes:
+  pg_data:
+  minio_data:
   ollama_models:
+  wa_auth:   # sesión de WhatsApp vinculada (wa-gateway) — no re-escanear QR

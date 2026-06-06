@@ -1,0 +1,311 @@
+// =============================================================================
+// Diagrama de base de datos · gestión documental B2B de contratos
+// Render: pegar en https://dbdiagram.io  (o usar la versión Mermaid en
+// schema.mermaid.md para verlo inline en GitHub/VSCode).
+// =============================================================================
+
+Project docswarm_b2b {
+  database_type: 'PostgreSQL'
+  Note: 'Bayern = comprador/granbase (admin). Proveedores = tenants con RLS.'
+}
+
+// ----------------------------- Tenant / auth --------------------------------
+Table empresas {
+  id bigint [pk, increment]
+  tipo text [note: 'COMPRADOR (Bayern) | PROVEEDOR']
+  nombre text [not null]
+  nit text [unique]
+  sector text
+  nicho text
+  pais text
+  ciudad text
+  metadata jsonb
+  perfil_vec "vector(1024)"
+  activo boolean
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table empresa_caracteristicas {
+  id bigint [pk, increment]
+  empresa_id bigint [ref: > empresas.id]
+  clave text
+  valor text
+  valor_num numeric
+}
+
+Table usuarios {
+  id bigint [pk, increment]
+  empresa_id bigint [ref: > empresas.id]
+  email text [unique]
+  password_hash text
+  nombre text
+  rol text [note: 'ADMIN | GESTOR | MIEMBRO']
+  activo boolean
+  ultimo_login timestamptz
+}
+
+// ----------------------------- Contratos ------------------------------------
+Table contratos {
+  id bigint [pk, increment]
+  empresa_proveedor_id bigint [ref: > empresas.id, note: 'tenant (RLS)']
+  empresa_compradora_id bigint [ref: > empresas.id]
+  numero text
+  titulo text [not null]
+  objeto text
+  sector text
+  estado text [note: 'BORRADOR|VIGENTE|SUSPENDIDO|VENCIDO|TERMINADO']
+  valor numeric
+  moneda text
+  fecha_inicio date
+  fecha_fin date
+  firmado_proveedor boolean
+  fecha_firma timestamptz
+  metadata jsonb
+  contenido_vec "vector(1024)"
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table contrato_clausulas {
+  id bigint [pk, increment]
+  contrato_id bigint [ref: > contratos.id]
+  tipo text [note: 'PRECIO|ENTREGA|CALIDAD|PAGO|...']
+  titulo text
+  contenido text
+  orden integer
+  version integer
+  clausula_maestra_id bigint [ref: > clausulas_maestras.id]
+  precio_maestro_id bigint [ref: > precios_maestros.id]
+  valor numeric
+  metadata jsonb
+}
+
+// --------------------- Catálogo maestro (Bayern, global) --------------------
+Table clausulas_maestras {
+  id bigint [pk, increment]
+  codigo text [unique]
+  tipo text
+  titulo text
+  contenido_actual text
+  version integer
+  sector text
+  nicho text
+  vigente boolean
+}
+
+Table precios_maestros {
+  id bigint [pk, increment]
+  codigo text [unique]
+  producto text
+  categoria text
+  precio numeric
+  moneda text
+  unidad text
+  version integer
+  vigente_desde date
+  vigente boolean
+  sector text
+  nicho text
+}
+
+// ----------------- Log de cambios (feature central) -------------------------
+Table cambios_maestros {
+  id bigint [pk, increment]
+  tipo_objeto text [note: 'CLAUSULA | PRECIO']
+  clausula_maestra_id bigint [ref: > clausulas_maestras.id]
+  precio_maestro_id bigint [ref: > precios_maestros.id]
+  accion text [note: 'CREACION|ACTUALIZACION|DEROGACION']
+  descripcion text
+  version_anterior integer
+  version_nueva integer
+  valor_anterior jsonb
+  valor_nuevo jsonb
+  realizado_por bigint [ref: > usuarios.id]
+  created_at timestamptz
+}
+
+Table cambios_documentos_afectados {
+  id bigint [pk, increment]
+  cambio_id bigint [ref: > cambios_maestros.id]
+  contrato_id bigint [ref: > contratos.id]
+  empresa_proveedor_id bigint [ref: > empresas.id]
+  clausula_contrato_id bigint [ref: > contrato_clausulas.id]
+  raw_document_id bigint [ref: > raw_documents.id]
+  estado_propagacion text
+  firmado_proveedor boolean [note: '★ ¿el proveedor ya firmó?']
+  fecha_firma timestamptz
+  firmado_por bigint [ref: > usuarios.id]
+  notificado_at timestamptz
+  observaciones text
+}
+
+// ----------------------- Data-platform (ETL / pgvector) ---------------------
+Table raw_documents {
+  id bigint [pk, increment]
+  source text
+  source_id text
+  domain text
+  titulo text
+  minio_bucket text
+  minio_key text
+  extension text
+  bytes_len bigint
+  tenant_id bigint [ref: > empresas.id]
+  contrato_id bigint [ref: > contratos.id]
+  sha256 text [unique]
+  logical_key text
+  version integer
+  supersedes_id bigint [ref: > raw_documents.id]
+  is_current boolean
+  lifecycle_stage text
+  parse_status text
+}
+
+Table parsed_documents {
+  id bigint [pk, increment]
+  raw_document_id bigint [ref: > raw_documents.id]
+  parser_name text
+  parser_version text
+  contenido_secciones jsonb
+  entities_extracted jsonb
+  parser_confidence numeric
+}
+
+Table document_chunks {
+  id bigint [pk, increment]
+  raw_document_id bigint [ref: > raw_documents.id]
+  tenant_id bigint [ref: > empresas.id]
+  domain text
+  seccion_hint text
+  chunk_index integer
+  contenido text
+  embedding_vec "vector(1024)"
+  metadata jsonb
+}
+
+Table document_links {
+  src_doc_id bigint [ref: > raw_documents.id]
+  dst_doc_id bigint [ref: > raw_documents.id]
+  link_type text
+  score numeric
+  indexes { (src_doc_id, dst_doc_id, link_type) [pk] }
+}
+
+Table ingest_jobs {
+  id bigint [pk, increment]
+  raw_document_id bigint [ref: > raw_documents.id]
+  step text
+  status text
+  attempt integer
+  latency_ms integer
+  error_message text
+}
+
+// --------------------------- Grafo de conocimiento --------------------------
+Table kg_entidades {
+  id bigint [pk, increment]
+  tipo text
+  nombre text
+  source_type text
+  source_id bigint
+  embedding_vec "vector(1024)"
+  metadata jsonb
+}
+
+Table kg_aristas {
+  id bigint [pk, increment]
+  source_id bigint [ref: > kg_entidades.id]
+  target_id bigint [ref: > kg_entidades.id]
+  relacion text
+  peso numeric
+}
+
+Table kg_validaciones {
+  id bigint [pk, increment]
+  afirmacion text
+  ruta jsonb
+  confianza numeric
+  estado text
+  empresa_id bigint [ref: > empresas.id]
+}
+
+// --------------------------- Orquestación / ops -----------------------------
+Table acp_runs {
+  id bigint [pk, increment]
+  run_id uuid
+  agent_name text
+  section_id text
+  status text
+  empresa_id bigint [ref: > empresas.id]
+  contrato_id bigint [ref: > contratos.id]
+  input jsonb
+  output jsonb
+  trajectory jsonb
+  citations jsonb
+  error jsonb
+  latency_ms integer
+  cache_key text
+}
+
+Table scrape_jobs {
+  id bigint [pk, increment]
+  job_type text
+  payload jsonb
+  dedup_key text [unique]
+  status text
+  priority integer
+  attempts integer
+  run_after timestamptz
+  locked_by text
+  heartbeat_at timestamptz
+}
+
+Table service_heartbeats {
+  service text [pk]
+  instance_id text
+  status text
+  detail jsonb
+  beat_at timestamptz
+}
+
+Table audit_metrics {
+  id bigint [pk, increment]
+  metric text
+  valor numeric
+  labels jsonb
+}
+
+// ------------------ Notificaciones (WhatsApp/Gmail) + firma -----------------
+Table notificaciones {
+  id bigint [pk, increment]
+  canal text [note: 'WHATSAPP|GMAIL|SISTEMA']
+  tipo text [note: 'CAMBIO|RECORDATORIO|FIRMA|GENERAL']
+  empresa_id bigint [ref: > empresas.id, note: 'tenant destino']
+  usuario_id bigint [ref: > usuarios.id, note: 'destinatario (admin/normal)']
+  afectado_id bigint [ref: > cambios_documentos_afectados.id]
+  contrato_id bigint [ref: > contratos.id]
+  cambio_id bigint [ref: > cambios_maestros.id]
+  destino text [note: 'teléfono/email']
+  asunto text
+  mensaje text
+  estado text [note: 'PENDIENTE|ENVIADO|ENTREGADO|LEIDO|FALLIDO']
+  referencia_externa text
+  enviado_at timestamptz
+  entregado_at timestamptz
+  leido_at timestamptz
+}
+
+Table firmas {
+  id bigint [pk, increment]
+  empresa_id bigint [ref: > empresas.id]
+  contrato_id bigint [ref: > contratos.id]
+  afectado_id bigint [ref: > cambios_documentos_afectados.id]
+  usuario_id bigint [ref: > usuarios.id, note: 'quien firma']
+  notificacion_id bigint [ref: > notificaciones.id]
+  canal text [note: 'WHATSAPP|GMAIL|WEB']
+  estado text [note: 'INICIADA|EN_PROCESO|FIRMADA|RECHAZADA|EXPIRADA']
+  token text [unique]
+  evidencia jsonb [note: 'OTP, hash, IP, ts']
+  firmado_at timestamptz
+}

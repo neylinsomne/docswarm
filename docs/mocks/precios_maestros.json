@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "describe": "Mock de precios maestros de Bayern para el front (catálogo).",
+    "mirror_endpoint": "GET /api/v1/catalogo/precios"
+  },
+  "precios": [
+    {"id": 1, "codigo": "PR-MAIZ-AMARILLO", "producto": "Maíz amarillo", "categoria": "cereales",
+     "precio": 1296000.0, "moneda": "COP", "unidad": "ton", "version": 2, "vigente": true},
+    {"id": 2, "codigo": "PR-SEMILLA-SOYA", "producto": "Semilla de soya", "categoria": "semillas",
+     "precio": 900000.0, "moneda": "COP", "unidad": "ton", "version": 2, "vigente": true},
+    {"id": 3, "codigo": "PR-ARROZ-PADDY", "producto": "Arroz paddy", "categoria": "cereales",
+     "precio": 1750000.0, "moneda": "COP", "unidad": "ton", "version": 1, "vigente": true},
+    {"id": 4, "codigo": "PR-UREA-46", "producto": "Urea 46%", "categoria": "fertilizantes",
+     "precio": 2300000.0, "moneda": "COP", "unidad": "ton", "version": 1, "vigente": true},
+    {"id": 5, "codigo": "PR-DAP", "producto": "Fosfato diamónico (DAP)", "categoria": "fertilizantes",
+     "precio": 2850000.0, "moneda": "COP", "unidad": "ton", "version": 1, "vigente": true},
+    {"id": 6, "codigo": "PR-GLIFOSATO", "producto": "Glifosato 48%", "categoria": "agroquimicos",
+     "precio": 18500.0, "moneda": "COP", "unidad": "litro", "version": 1, "vigente": true},
+    {"id": 7, "codigo": "PR-EMPAQUE-50KG", "producto": "Saco biodegradable 50kg", "categoria": "empaques",
+     "precio": 1800.0, "moneda": "COP", "unidad": "unidad", "version": 1, "vigente": true},
+    {"id": 8, "codigo": "PR-FLETE-TON-KM", "producto": "Flete refrigerado", "categoria": "logistica",
+     "precio": 1200.0, "moneda": "COP", "unidad": "ton-km", "version": 1, "vigente": true},
+    {"id": 9, "codigo": "PR-CAFE-PERGAMINO", "producto": "Café pergamino", "categoria": "cereales",
+     "precio": 11200000.0, "moneda": "COP", "unidad": "ton", "version": 1, "vigente": false},
+    {"id": 10, "codigo": "PR-RIEGO-GOTEO-HA", "producto": "Sistema riego por goteo", "categoria": "riego",
+     "precio": 6500000.0, "moneda": "COP", "unidad": "hectarea", "version": 1, "vigente": true}
+  ]
+}

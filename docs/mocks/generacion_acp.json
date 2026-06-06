@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "describe": "Mock de la respuesta de generación ACP (prompt -> documento) para previsualizar en el wizard de crear contrato.",
+    "mirror_endpoint": "POST /api/v1/contratos/generar",
+    "request_ejemplo": {
+      "prompt": "Contrato de suministro de semilla de soya certificada 2026, entrega mensual, pago a 30 días.",
+      "empresa_proveedor_id": 2,
+      "objeto": "Suministro de semilla de soya certificada",
+      "titulo": "Contrato de suministro de soya 2026",
+      "clausulas_maestras_ids": [1, 2],
+      "precios_maestros_ids": [2],
+      "use_ollama": true
+    }
+  },
+  "respuesta": {
+    "titulo": "Contrato de suministro de soya 2026",
+    "secciones": ["objeto", "condiciones_comerciales", "especificaciones_tecnicas", "clausulas_legales"],
+    "warnings": [],
+    "markdown": "**Objeto del contrato**\n\nEl presente contrato tiene por objeto el suministro de semilla de soya certificada, con entrega mensual y pago a 30 días hábiles desde la orden de compra.\n\n**Condiciones comerciales**\n\n1. Precio: 900.000 COP por tonelada.\n2. Forma de pago: transferencia a 30 días desde la factura.\n3. Plazo de entrega: máximo 15 días hábiles, entregas mensuales.\n\n**Especificaciones técnicas**\n\n- Humedad del grano <= 11%.\n- Certificado fitosanitario ICA por lote.\n\n**Cláusulas legales**\n\n- Confidencialidad de la información comercial.\n- Penalización por mora en la entrega.\n- Terminación por incumplimiento reiterado.",
+    "html": "<h3>Objeto del contrato</h3><p>El presente contrato tiene por objeto el suministro de semilla de soya certificada...</p>"
+  }
+}

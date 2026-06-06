@@ -1,0 +1,68 @@
+{
+  "_meta": {
+    "describe": "Mock de cláusulas maestras de Bayern para el front (catálogo).",
+    "mirror_endpoint": "GET /api/v1/catalogo/clausulas",
+    "tipos": ["ENTREGA", "CALIDAD", "PAGO", "PENALIZACION", "CONFIDENCIALIDAD", "GENERAL"]
+  },
+  "clausulas": [
+    {"id": 1, "codigo": "CL-CALIDAD-001", "tipo": "CALIDAD",
+     "titulo": "Estándar de calidad de grano",
+     "contenido_actual": "El producto debe cumplir humedad <= 13% e impurezas <= 1%. Se realizarán análisis de laboratorio por muestreo.",
+     "version": 1, "sector": "agro", "nicho": null, "vigente": true},
+
+    {"id": 2, "codigo": "CL-ENTREGA-001", "tipo": "ENTREGA",
+     "titulo": "Plazo de entrega",
+     "contenido_actual": "Entrega en máximo 15 días hábiles desde la orden de compra, en los puntos de recepción acordados.",
+     "version": 1, "sector": "agro", "nicho": null, "vigente": true},
+
+    {"id": 3, "codigo": "CL-PAGO-001", "tipo": "PAGO",
+     "titulo": "Condiciones de pago",
+     "contenido_actual": "Pago mediante transferencia bancaria a 30 días calendario desde la radicación de la factura.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 4, "codigo": "CL-PAGO-002", "tipo": "PAGO",
+     "titulo": "Anticipo y amortización",
+     "contenido_actual": "Anticipo del 20% del valor del contrato, amortizable proporcionalmente en cada entrega.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 5, "codigo": "CL-PENAL-001", "tipo": "PENALIZACION",
+     "titulo": "Penalización por mora en la entrega",
+     "contenido_actual": "Por cada día hábil de retraso se aplicará una multa del 0,5% del valor de la entrega afectada, hasta un tope del 10%.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 6, "codigo": "CL-PENAL-002", "tipo": "PENALIZACION",
+     "titulo": "Rechazo por incumplimiento de calidad",
+     "contenido_actual": "El comprador podrá rechazar lotes que no cumplan el estándar de calidad, con reposición a cargo del proveedor.",
+     "version": 1, "sector": "agro", "nicho": null, "vigente": true},
+
+    {"id": 7, "codigo": "CL-CONF-001", "tipo": "CONFIDENCIALIDAD",
+     "titulo": "Confidencialidad de la información comercial",
+     "contenido_actual": "Las partes mantendrán reserva sobre precios, volúmenes y condiciones durante la vigencia y por 2 años posteriores.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 8, "codigo": "CL-CALIDAD-002", "tipo": "CALIDAD",
+     "titulo": "Certificación fitosanitaria",
+     "contenido_actual": "Cada lote debe adjuntar certificado fitosanitario ICA vigente y trazabilidad de origen.",
+     "version": 1, "sector": "agro", "nicho": "semillas", "vigente": true},
+
+    {"id": 9, "codigo": "CL-ENTREGA-002", "tipo": "ENTREGA",
+     "titulo": "Cadena de frío en transporte",
+     "contenido_actual": "El transporte de perecederos se realizará en cadena de frío entre 2°C y 6°C con registro de temperatura.",
+     "version": 1, "sector": "logistica", "nicho": "cadena_frio", "vigente": true},
+
+    {"id": 10, "codigo": "CL-GEN-001", "tipo": "GENERAL",
+     "titulo": "Vigencia y renovación",
+     "contenido_actual": "El contrato tiene vigencia de un año, renovable automáticamente salvo aviso con 30 días de antelación.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 11, "codigo": "CL-GEN-002", "tipo": "GENERAL",
+     "titulo": "Resolución de controversias",
+     "contenido_actual": "Las controversias se resolverán mediante conciliación; en su defecto, tribunal de arbitramento de la Cámara de Comercio.",
+     "version": 1, "sector": null, "nicho": null, "vigente": true},
+
+    {"id": 12, "codigo": "CL-CALIDAD-003", "tipo": "CALIDAD",
+     "titulo": "Empaque y rotulado",
+     "contenido_actual": "El producto debe empacarse en material biodegradable rotulado con lote, peso y fecha de producción.",
+     "version": 2, "sector": "agro", "nicho": "empaques", "vigente": true}
+  ]
+}
